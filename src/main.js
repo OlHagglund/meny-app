@@ -1,11 +1,25 @@
 import './style.css'
+import { supabase } from './supabase'
 
-/* ===== LocalStorage (delad lista) ===== */
+/* ===========================
+   Publika bilder i Supabase Storage (bucket)
+   =========================== */
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const IMAGE_BUCKET = 'hagglund-meny-images' // byt om din bucket heter något annat
+function imageUrlFrom(fileName = '') {
+  return `${SUPABASE_URL}/storage/v1/object/public/${IMAGE_BUCKET}/${fileName}`
+}
+
+/* ===========================
+   Inköpslista i LocalStorage
+   =========================== */
 const KEY = 'shopping-list-v1'
-function loadList(){ try{ return JSON.parse(localStorage.getItem(KEY)) || [] }catch{ return [] } }
+function loadList(){ try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch { return [] } }
 function saveList(list){ localStorage.setItem(KEY, JSON.stringify(list)) }
 
-/* ===== Toast ===== */
+/* ===========================
+   Toast
+   =========================== */
 function showToast(msg) {
   let toast = document.querySelector('.toast')
   if (!toast) {
@@ -19,120 +33,9 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2000)
 }
 
-/* ===== Menydata (1 portion) – lokala bilder + kategori ===== */
-const menu = [
-  {
-    id: 'kottfarslimpa',
-    name: 'Köttfärslimpa med gräddsås',
-    img: '/images/kottfarslimpa.png',
-    category: 'Husman',
-    ingredients: [
-      '150 g nötfärs','0,5 dl mjölk','1 msk ströbröd','0,25 ägg','0,25 gul lök',
-      '2 små potatisar','0,5 dl grädde','0,5 dl köttbuljong','1 msk smör'
-    ],
-    nutr: { kcal: 650, protein: 35, carbs: 55, fat: 34 }
-  },
-  {
-    id: 'kramig-kycklingpasta',
-    name: 'Krämig kycklingpasta',
-    img: '/images/kramig-kycklingpasta.png',
-    category: 'Pasta',
-    ingredients: [
-      '80 g pasta','100 g kycklingfilé','0,5 dl grädde','0,25 gul lök',
-      '1 liten vitlöksklyfta','1 msk riven parmesan','0,5 msk olivolja'
-    ],
-    nutr: { kcal: 620, protein: 36, carbs: 62, fat: 24 }
-  },
-  {
-    id: 'lasagne',
-    name: 'Lasagne',
-    img: '/images/lasagne.png',
-    category: 'Pasta',
-    ingredients: [
-      '60 g lasagneplattor','100 g nötfärs','1 dl krossade tomater','0,25 gul lök',
-      '0,5 msk tomatpuré','0,5 dl mjölk','0,5 msk smör','0,5 msk vetemjöl','15 g riven ost'
-    ],
-    nutr: { kcal: 560, protein: 30, carbs: 55, fat: 22 }
-  },
-  {
-    id: 'pumpasoppa',
-    name: 'Rostad butternutpumpasoppa',
-    img: '/images/pumpasoppa.png',
-    category: 'Soppa',
-    ingredients: [
-      '200 g butternutpumpa','0,25 gul lök','1 liten vitlöksklyfta',
-      '2 dl grönsaksbuljong','0,5 dl grädde','0,5 msk olivolja','1 skiva bröd'
-    ],
-    nutr: { kcal: 450, protein: 7, carbs: 55, fat: 20 }
-  },
-  {
-    id: 'flaskpannkaka',
-    name: 'Fläskpannkaka',
-    img: '/images/flaskpannkaka.png',
-    category: 'Husman',
-    ingredients: [
-      '1 ägg','0,75 dl vetemjöl','1,5 dl mjölk','60 g rimmat sidfläsk','0,5 msk smör'
-    ],
-    nutr: { kcal: 520, protein: 22, carbs: 36, fat: 30 }
-  },
-  {
-    id: 'mild-chili',
-    name: 'Mild chiligryta',
-    img: '/images/mild-chili.png',
-    category: 'Gryta',
-    ingredients: [
-      '100 g nötfärs','0,25 gul lök','0,5 vitlöksklyfta','1 dl krossade tomater',
-      '0,5 dl kokta kidneybönor','0,5 msk tomatpuré','0,5 msk olivolja',
-      '0,25 tsk chilipulver','0,25 tsk spiskummin'
-    ],
-    nutr: { kcal: 480, protein: 30, carbs: 25, fat: 28 }
-  },
-  {
-    id: 'lax-dillpotatis',
-    name: 'Stekt lax med dillpotatis',
-    img: '/images/lax-dillpotatis.png',
-    category: 'Fisk',
-    ingredients: [
-      '140 g laxfilé','3 små potatisar','0,5 msk smör','1 msk hackad dill','1 citronklyfta'
-    ],
-    nutr: { kcal: 540, protein: 32, carbs: 35, fat: 28 }
-  },
-  {
-    id: 'varm-smorgas',
-    name: 'Varm smörgås ost & skinka',
-    img: '/images/varm-smorgas.png',
-    category: 'Snabbt',
-    ingredients: [
-      '2 skivor formfranska','30 g skinka','25 g ost','0,5 msk smör','1 tomatskiva'
-    ],
-    nutr: { kcal: 380, protein: 16, carbs: 36, fat: 18 }
-  },
-  {
-    id: 'pannkakor',
-    name: 'Pannkakor',
-    img: '/images/pannkakor.png',
-    category: 'Bak',
-    ingredients: [
-      '1 ägg','1 dl vetemjöl','2 dl mjölk','0,5 msk smör','2 msk sylt'
-    ],
-    nutr: { kcal: 430, protein: 13, carbs: 55, fat: 16 }
-  },
-  {
-    id: 'torsk-aggsas',
-    name: 'Ugnsbakad torsk med äggsås',
-    img: '/images/torsk-aggsas.png',
-    category: 'Fisk',
-    ingredients: [
-      '140 g torskfilé','2 potatisar','0,5 ägg (kokt, hackat)',
-      '1 dl mjölk','0,5 msk smör','0,5 msk vetemjöl','1 msk hackad persilja'
-    ],
-    nutr: { kcal: 470, protein: 33, carbs: 45, fat: 15 }
-  }
-]
-
-
-/* ===== Portionering & skalning ===== */
-const servings = Object.fromEntries(menu.map(m => [m.id, 1]))
+/* ===========================
+   Skalning av ingredienser
+   =========================== */
 const UNIT_SET = new Set(['g','kg','ml','dl','l','msk','tsk','krm','st'])
 function parseNumberToken(t){
   t = t.replace(',', '.').trim()
@@ -158,7 +61,38 @@ function scaleIngredient(line, factor){
 }
 const scaleAll = (ings,f)=>ings.map(x=>scaleIngredient(x,f))
 
-/* ===== UI skeleton ===== */
+/* ===========================
+   Makro-chips (kcal egen rad)
+   =========================== */
+function macroLabel(key) {
+  const map = { protein: 'Protein', carbs: 'Kolhydrater', fat: 'Fett', fiber: 'Fiber' }
+  return map[key] || key
+}
+function renderMacroBlocks(nutr) {
+  if (!nutr) return ''
+  const kcal = typeof nutr.kcal === 'number' ? nutr.kcal : null
+  const order = ['protein', 'carbs', 'fat', 'fiber']
+  const others = Object.entries(nutr)
+    .filter(([k]) => k !== 'kcal')
+    .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
+
+  const kcalRow = kcal !== null
+    ? `<div class="macros"><span class="chip kcal" title="Kalorier per portion">🔥 ${kcal} kcal</span></div>`
+    : ''
+
+  const otherChips = others.map(([k, v]) => {
+    const cls = (k === 'protein' || k === 'carbs' || k === 'fat' || k === 'fiber') ? k : ''
+    const unit = (k === 'protein' || k === 'carbs' || k === 'fat' || k === 'fiber') ? ' g' : ''
+    return `<span class="chip ${cls}" title="${macroLabel(k)} per portion">${macroLabel(k)}: ${v}${unit}</span>`
+  }).join('')
+
+  const otherRow = otherChips ? `<div class="macros">${otherChips}</div>` : ''
+  return kcalRow + otherRow
+}
+
+/* ===========================
+   UI-skelett
+   =========================== */
 const app = document.querySelector('#app')
 app.innerHTML = `
   <header>
@@ -191,38 +125,171 @@ app.innerHTML = `
   </div>
 `
 
-/* ===== Filter-knappar ===== */
-const categories = [...new Set(menu.map(m=>m.category))]
-const active = new Set() // tom = alla
-const filtersEl = document.querySelector('#filters')
-filtersEl.innerHTML = `
-  <button class="chip ${active.size===0?'active':''}" data-cat="__ALL__">Alla</button>
-  ${categories.map(c=>`<button class="chip" data-cat="${c}">${c}</button>`).join('')}
+/* ===== Edit-modal (full redigering) ===== */
+const editHost = document.createElement('div')
+editHost.innerHTML = `
+  <div class="modal" id="editModal" aria-hidden="true" role="dialog" aria-labelledby="editTitle" aria-modal="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card" role="document">
+      <div class="modal-header" id="editTitle">Redigera recept</div>
+      <div class="modal-body">
+        <div style="text-align:left; display:grid; gap:10px;">
+          <label style="font-weight:600;">Namn</label>
+          <input id="editName" class="input" placeholder="Maträttens namn" />
+
+          <label style="font-weight:600;">Kategori</label>
+          <input id="editCategory" class="input" list="catList" placeholder="t.ex. Husman, Pasta, Fisk" />
+          <datalist id="catList"></datalist>
+
+          <label style="font-weight:600;">Bildfil i Storage</label>
+          <input id="editImageFile" class="input" placeholder="t.ex. kottfarslimpa.png" />
+          <small style="color:var(--text-sec)">Filen ska ligga i Supabase-bucket <b>${IMAGE_BUCKET}</b>. Ange bara filnamn + ändelse.</small>
+
+          <div class="row" style="gap:8px; flex-wrap:wrap;">
+            <div style="display:grid; gap:6px;">
+              <label style="font-weight:600;">Kalorier / port</label>
+              <input id="editKcal" class="input" type="number" min="0" step="1" placeholder="kcal" style="width:140px;" />
+            </div>
+            <div style="display:grid; gap:6px;">
+              <label style="font-weight:600;">Protein (g) / port</label>
+              <input id="editProtein" class="input" type="number" min="0" step="1" placeholder="g" style="width:160px;" />
+            </div>
+            <div style="display:grid; gap:6px;">
+              <label style="font-weight:600;">Kolhydrater (g) / port</label>
+              <input id="editCarbs" class="input" type="number" min="0" step="1" placeholder="g" style="width:180px;" />
+            </div>
+            <div style="display:grid; gap:6px;">
+              <label style="font-weight:600;">Fett (g) / port</label>
+              <input id="editFat" class="input" type="number" min="0" step="1" placeholder="g" style="width:140px;" />
+            </div>
+          </div>
+
+          <label style="font-weight:600; margin-top:6px;">Ingredienser (en per rad)</label>
+          <textarea id="editIngredients" class="input" rows="8" style="resize:vertical;" placeholder="150 g nötfärs&#10;0,5 dl mjölk&#10;..."></textarea>
+          <small style="color:var(--text-sec)">Tips: börja varje rad med mängd + enhet för snygg skalning.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" id="editCancel">Avbryt</button>
+        <button class="modal-btn danger" id="editSave">Spara</button>
+      </div>
+    </div>
+  </div>
 `
+document.body.appendChild(editHost)
+
+/* ===== Modal helpers ===== */
+function openEditModal(dish){
+  const modal = document.getElementById('editModal')
+  modal.dataset.id = dish.id
+  document.getElementById('editTitle').textContent = `Redigera: ${dish.name}`
+
+  document.getElementById('editName').value      = dish.name || ''
+  document.getElementById('editCategory').value  = dish.category || ''
+  document.getElementById('editImageFile').value = (dish.img ? dish.img.split('/').pop() : '') || ''
+
+  const n = dish.nutr || {}
+  document.getElementById('editKcal').value    = n.kcal ?? ''
+  document.getElementById('editProtein').value = n.protein ?? ''
+  document.getElementById('editCarbs').value   = n.carbs ?? ''
+  document.getElementById('editFat').value     = n.fat ?? ''
+
+  document.getElementById('editIngredients').value = (dish.ingredients||[]).join('\n')
+
+  const cats = [...new Set(menu.map(m=>m.category))].sort((a,b)=>a.localeCompare(b,'sv'))
+  document.getElementById('catList').innerHTML = cats.map(c=>`<option value="${c}">`).join('')
+
+  modal.classList.add('open')
+  modal.setAttribute('aria-hidden','false')
+}
+function closeEditModal(){
+  const modal = document.getElementById('editModal')
+  modal.classList.remove('open')
+  modal.setAttribute('aria-hidden','true')
+  delete modal.dataset.id
+}
+document.getElementById('editCancel').addEventListener('click', closeEditModal)
+document.querySelector('#editModal .modal-backdrop').addEventListener('click', closeEditModal)
+
+/* ===========================
+   State + elementref
+   =========================== */
+let menu = []                    // laddas från Supabase
+const servings = {}              // { dishId: number }
+const active = new Set()         // kategori-filter (tom = alla)
+
+const filtersEl = document.querySelector('#filters')
+const searchEl  = document.querySelector('#search')
+const sortEl    = document.querySelector('#sort')
+const grid      = document.querySelector('#menuGrid')
+
+searchEl.addEventListener('input', renderMenu)
+sortEl.addEventListener('change', renderMenu)
 filtersEl.addEventListener('click',(e)=>{
   const cat = e.target?.dataset?.cat; if(!cat) return
   if (cat==='__ALL__'){ active.clear() }
   else { active.has(cat) ? active.delete(cat) : active.add(cat) }
-  // uppdatera aktiv-styling
-  filtersEl.querySelectorAll('.chip').forEach(b=>{
+  updateFilterButtons()
+  renderMenu()
+})
+
+/* ===========================
+   Supabase: hämta rätter
+   =========================== */
+async function loadMenuFromDB() {
+  grid.innerHTML = `<div class="card"><div class="card-body">Laddar rätter…</div></div>`
+
+  const { data, error } = await supabase
+    .from('dishes')
+    .select('id, name, category, image_file, ingredients, nutr')
+    .order('name', { ascending: true })
+
+  if (error) {
+    console.error('Supabase error:', error)
+    grid.innerHTML = `<div class="card"><div class="card-body">Kunde inte hämta rätter.</div></div>`
+    showToast('Kunde inte hämta rätter')
+    return
+  }
+
+  menu = (data || []).map(row => ({
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    img: imageUrlFrom(row.image_file || ''),
+    ingredients: Array.isArray(row.ingredients) ? row.ingredients : [],
+    nutr: row.nutr && typeof row.nutr === 'object' ? row.nutr : null
+  }))
+
+  for (const d of menu) { if (!servings[d.id]) servings[d.id] = 1 }
+
+  rebuildFilters()
+  renderMenu()
+}
+
+/* ===========================
+   Filter-knappar
+   =========================== */
+function rebuildFilters(){
+  const categories = [...new Set(menu.map(m=>m.category))].sort((a,b)=>a.localeCompare(b,'sv'))
+  filtersEl.innerHTML = `
+    <button class="chip ${active.size===0?'active':''}" data-cat="__ALL__">Alla</button>
+    ${categories.map(c=>`<button class="chip" data-cat="${c}">${c}</button>`).join('')}
+  `
+}
+function updateFilterButtons(){
+  const btns = filtersEl.querySelectorAll('.chip')
+  btns.forEach(b=>{
     const c = b.dataset.cat
     if (c==='__ALL__') b.classList.toggle('active', active.size===0)
     else b.classList.toggle('active', active.has(c))
   })
-  renderMenu()
-})
+}
 
-/* ===== Sök + sort ===== */
-const searchEl = document.querySelector('#search')
-const sortEl = document.querySelector('#sort')
-searchEl.addEventListener('input', renderMenu)
-sortEl.addEventListener('change', renderMenu)
-
-/* ===== Render ===== */
-const grid = document.querySelector('#menuGrid')
-
+/* ===========================
+   Render-hjälpare
+   =========================== */
 function applySearchFilterSort(items){
-  const q = (searchEl.value||'').toLowerCase()
+  const q = (searchEl.value||'').toLowerCase().trim()
   let out = items.filter(m=>{
     const inCat = active.size===0 || active.has(m.category)
     if (!inCat) return false
@@ -240,54 +307,25 @@ function applySearchFilterSort(items){
   return out
 }
 
-// Gör en label av en makronyckel
-function macroLabel(key) {
-  const map = { protein: 'Protein', carbs: 'Kolhydrater', fat: 'Fett', fiber: 'Fiber' }
-  return map[key] || key
-}
-
-// Bygger två rader: 1) kcal, 2) övriga makron
-function renderMacroBlocks(nutr) {
-  if (!nutr) return ''
-  const kcal = typeof nutr.kcal === 'number' ? nutr.kcal : null
-
-  // Samla alla nycklar utom kcal och sortera i bestämd ordning
-  const order = ['protein', 'carbs', 'fat', 'fiber']
-  const others = Object.entries(nutr)
-    .filter(([k]) => k !== 'kcal')
-    .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
-
-  const kcalRow = kcal !== null
-    ? `<div class="macros"><span class="chip kcal" title="Kalorier per portion">🔥 ${kcal} kcal</span></div>`
-    : ''
-
-  const otherChips = others.map(([k, v]) => {
-    const cls = (k === 'protein' || k === 'carbs' || k === 'fat' || k === 'fiber') ? k : ''
-    const unit = (k === 'protein' || k === 'carbs' || k === 'fat' || k === 'fiber') ? ' g' : ''
-    return `<span class="chip ${cls}" title="${macroLabel(k)} per portion">${macroLabel(k)}: ${v}${unit}</span>`
-  }).join('')
-
-  const otherRow = otherChips
-    ? `<div class="macros">${otherChips}</div>`
-    : ''
-
-  return kcalRow + otherRow
-}
-
-
-function renderCard(dish){
+function renderCard(dish) {
   const factor = servings[dish.id] || 1
   const scaled = scaleAll(dish.ingredients, factor)
 
   return `
     <article class="card" data-card="${dish.id}">
-      ${dish.img ? `<img class="card-img" src="${dish.img}" alt="${dish.name}">` : ''}
+      <div class="card-img-wrapper">
+        ${dish.img ? `<img class="card-img" src="${dish.img}" alt="${dish.name}">` : ''}
+        <button class="btn edit-btn" data-edit="${dish.id}" title="Redigera recept">
+          ✏️ Edit
+        </button>
+      </div>
       <div class="card-body">
         <div class="card-title">${dish.name}</div>
 
         <div class="row">
           <label for="serv-${dish.id}">Portioner:</label>
-          <input id="serv-${dish.id}" class="input servings" data-id="${dish.id}" type="number" min="1" step="1" value="${factor}" style="width:90px" />
+          <input id="serv-${dish.id}" class="input servings" data-id="${dish.id}"
+                 type="number" min="1" step="1" value="${factor}" style="width:90px" />
         </div>
 
         ${renderMacroBlocks(dish.nutr)}
@@ -305,47 +343,137 @@ function renderCard(dish){
 
 function renderMenu(){
   const items = applySearchFilterSort(menu)
+  if (!items.length){
+    grid.innerHTML = `<div class="card"><div class="card-body">Inga rätter matchar just nu.</div></div>`
+    return
+  }
   grid.innerHTML = items.map(renderCard).join('')
 }
-renderMenu()
 
-/* ===== Interaktioner ===== */
+/* ===========================
+   Interaktioner i grid
+   =========================== */
 grid.addEventListener('input',(e)=>{
   const id = e.target?.dataset?.id
   if (!id) return
   const v = Math.max(1, parseInt(e.target.value||'1',10))
   servings[id] = v
-  // uppdatera ingredienser i detta kort
   const dish = menu.find(m=>m.id===id)
   const host = grid.querySelector(`.ing-list[data-ings="${id}"]`)
   if (dish && host) host.innerHTML = scaleAll(dish.ingredients, v).map(i=>`• ${i}`).join('<br>')
 })
 
-grid.addEventListener('click',(e)=>{
-  const id = e.target?.dataset?.add
-  if (!id) return
-  const btn = e.target
-  const dish = menu.find(m=>m.id===id)
-  const factor = servings[id] || 1
-  const scaled = scaleAll(dish.ingredients, factor)
+grid.addEventListener('click', async (e) => {
+  const editId = e.target?.dataset?.edit
+  const addId  = e.target?.dataset?.add
 
-  const list = loadList()
-  for (const ing of scaled){
-    const existing = list.find(x => x.name === ing)
-    if (existing) existing.qty += 1
-    else list.push({ name: ing, qty: 1, checked: false })
+  // 1️⃣ Öppna edit-modal först
+  if (editId) {
+    const dish = menu.find(m => m.id === editId)
+    if (!dish) return
+    openEditModal(dish)
+    return
   }
-  saveList(list)
 
-  // Knapp-animation “Tillagd ✓”
-  const original = btn.textContent
-  btn.textContent = 'Tillagd ✓'
-  btn.classList.add('added')
-  btn.disabled = true
-  showToast('Ingredienser tillagda')
-  setTimeout(()=>{
-    btn.textContent = original
-    btn.classList.remove('added')
-    btn.disabled = false
-  }, 1200)
+  // 2️⃣ Lägg till i inköpslistan
+  if (addId) {
+    const btn  = e.target
+    const dish = menu.find(m => m.id === addId)
+    const factor = servings[addId] || 1
+    const scaled = scaleAll(dish.ingredients, factor)
+
+    const list = loadList()
+    for (const ing of scaled) {
+      const existing = list.find(x => x.name === ing)
+      if (existing) existing.qty += 1
+      else list.push({ name: ing, qty: 1, checked: false })
+    }
+    saveList(list)
+
+    const original = btn.textContent
+    btn.textContent = 'Tillagd ✓'
+    btn.classList.add('added')
+    btn.disabled = true
+    showToast('Ingredienser tillagda')
+    setTimeout(() => {
+      btn.textContent = original
+      btn.classList.remove('added')
+      btn.disabled = false
+    }, 1200)
+    return
+  }
 })
+
+
+/* ===========================
+   Spara ändringar (uppdatera DB)
+   =========================== */
+document.getElementById('editSave').addEventListener('click', async ()=>{
+  const modal = document.getElementById('editModal')
+  const id = modal.dataset.id
+  if (!id) return
+
+  const name      = document.getElementById('editName').value.trim()
+  const category  = document.getElementById('editCategory').value.trim()
+  const imageFile = document.getElementById('editImageFile').value.trim()
+
+  const toNum = (v)=> {
+    if (v===null || v===undefined || v==='') return null
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  const kcal    = toNum(document.getElementById('editKcal').value)
+  const protein = toNum(document.getElementById('editProtein').value)
+  const carbs   = toNum(document.getElementById('editCarbs').value)
+  const fat     = toNum(document.getElementById('editFat').value)
+
+  const lines = document.getElementById('editIngredients').value
+    .split('\n').map(s=>s.trim()).filter(Boolean)
+
+  if (!name){ showToast('Namn saknas'); return }
+  if (!category){ showToast('Kategori saknas'); return }
+  if (!imageFile){ showToast('Bildfil saknas'); return }
+
+  const nutr = {}
+  if (kcal   !== null) nutr.kcal    = kcal
+  if (protein!== null) nutr.protein = protein
+  if (carbs  !== null) nutr.carbs   = carbs
+  if (fat    !== null) nutr.fat     = fat
+
+  const payload = {
+    name,
+    category,
+    image_file: imageFile,     // i DB lagrar vi bara filnamn
+    ingredients: lines,
+    nutr: Object.keys(nutr).length ? nutr : null
+  }
+
+  const { error } = await supabase.from('dishes')
+    .update(payload)
+    .eq('id', id)
+
+  if (error){
+    console.error(error)
+    showToast('Kunde inte spara ändringar')
+    return
+  }
+
+  // Uppdatera lokalt + UI
+  const d = menu.find(m=>m.id===id)
+  if (d){
+    d.name = name
+    d.category = category
+    d.img = imageUrlFrom(imageFile)
+    d.ingredients = lines
+    d.nutr = Object.keys(nutr).length ? nutr : null
+  }
+  rebuildFilters()
+  renderMenu()
+  closeEditModal()
+  showToast('Recept uppdaterat')
+})
+
+/* ===========================
+   Start
+   =========================== */
+loadMenuFromDB()
