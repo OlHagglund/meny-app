@@ -411,8 +411,9 @@ grid.addEventListener('click', async (e) => {
 document.getElementById('editSave').addEventListener('click', async ()=>{
   const modal = document.getElementById('editModal')
   const id = modal.dataset.id
-  if (!id) return
+  if (!id) { showToast('Hittar inte id'); return }
 
+  // Läs fält
   const name      = document.getElementById('editName').value.trim()
   const category  = document.getElementById('editCategory').value.trim()
   const imageFile = document.getElementById('editImageFile').value.trim()
@@ -427,51 +428,62 @@ document.getElementById('editSave').addEventListener('click', async ()=>{
   const carbs   = toNum(document.getElementById('editCarbs').value)
   const fat     = toNum(document.getElementById('editFat').value)
 
-  const lines = document.getElementById('editIngredients').value
+  const ingredients = document.getElementById('editIngredients').value
     .split('\n').map(s=>s.trim()).filter(Boolean)
 
-  if (!name){ showToast('Namn saknas'); return }
-  if (!category){ showToast('Kategori saknas'); return }
-  if (!imageFile){ showToast('Bildfil saknas'); return }
+  // Lätt validering
+  if (!name)      { showToast('Namn saknas'); return }
+  if (!category)  { showToast('Kategori saknas'); return }
+  if (!imageFile) { showToast('Bildfil saknas'); return }
 
+  // Bygg nutr-objekt (eller null)
   const nutr = {}
   if (kcal   !== null) nutr.kcal    = kcal
   if (protein!== null) nutr.protein = protein
   if (carbs  !== null) nutr.carbs   = carbs
   if (fat    !== null) nutr.fat     = fat
+  const nutrPayload = Object.keys(nutr).length ? nutr : null
 
+  // Payload måste matcha kolumntyperna i Supabase:
+  // name: text, category: text, image_file: text, ingredients: text[], nutr: jsonb
   const payload = {
     name,
     category,
-    image_file: imageFile,     // i DB lagrar vi bara filnamn
-    ingredients: lines,
-    nutr: Object.keys(nutr).length ? nutr : null
+    image_file: imageFile,
+    ingredients,     // Array av strängar → text[]
+    nutr: nutrPayload
   }
 
-  const { error } = await supabase.from('dishes')
+  // 🔎 Debug-logg om något strular
+  console.log('UPDATING dish id:', id, 'payload:', payload)
+
+  // Skriv till Supabase
+  const { data, error } = await supabase
+    .from('dishes')
     .update(payload)
     .eq('id', id)
+    .select() // får tillbaka raden efter update
 
-  if (error){
-    console.error(error)
-    showToast('Kunde inte spara ändringar')
+  if (error) {
+    console.error('Supabase UPDATE error:', error)
+    showToast('Kunde inte spara till databasen')
     return
   }
 
-  // Uppdatera lokalt + UI
+  // Uppdatera lokalt och rendera om för instant feedback
   const d = menu.find(m=>m.id===id)
   if (d){
     d.name = name
     d.category = category
     d.img = imageUrlFrom(imageFile)
-    d.ingredients = lines
-    d.nutr = Object.keys(nutr).length ? nutr : null
+    d.ingredients = ingredients
+    d.nutr = nutrPayload
   }
-  rebuildFilters()
   renderMenu()
   closeEditModal()
   showToast('Recept uppdaterat')
 })
+
 
 /* ===========================
    Start
