@@ -1,0 +1,304 @@
+/* ===========================
+   Bas–tokens + typografi
+   =========================== */
+:root{
+  --bg:#fbfbfd;
+  --surface:#fff;
+  --text:#0a0a0a;
+  --text-sec:#6e6e73;
+  --border:rgba(0,0,0,.1);
+  --shadow:0 6px 24px rgba(0,0,0,.07), 0 1px 1px rgba(0,0,0,.05);
+  --accent:#0071e3;
+  --radius:16px;
+
+  /* Chips-färger (kcal/protein/kolhydrat/fett) */
+  --chip-kcal-bg:#fff7ed;  --chip-kcal-bd:#fdba74;  --chip-kcal-tx:#9a3412;
+  --chip-prot-bg:#e0f2fe;  --chip-prot-bd:#7dd3fc;  --chip-prot-tx:#0c4a6e;
+  --chip-carb-bg:#ecfdf5;  --chip-carb-bd:#6ee7b7;  --chip-carb-tx:#065f46;
+  --chip-fat-bg:#f5f3ff;   --chip-fat-bd:#c4b5fd;   --chip-fat-tx:#4c1d95;
+}
+
+*{ box-sizing:border-box }
+
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:15px/1.5 ui-sans-serif,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* För tydlig tabbning utan att störa musanvändare */
+:focus-visible{
+  outline: 3px solid color-mix(in oklab, var(--accent) 50%, transparent);
+  outline-offset: 2px;
+}
+
+/* ===========================
+   Layout & header
+   =========================== */
+header{
+  position:sticky; top:0; z-index:10;
+  background:rgba(255,255,255,.8);
+  backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.head{
+  max-width:1080px; margin:0 auto; padding:14px 20px;
+  display:flex; gap:12px; align-items:center; justify-content:space-between;
+}
+.brand{ font-weight:700 }
+.container{ max-width:1080px; margin:0 auto; padding:22px }
+
+/* Rubriker */
+h1{ margin:0 0 6px; font-size:26px; font-weight:700; letter-spacing:-.01em }
+h3{ margin:0 0 6px; font-size:14px; color:var(--text-sec) }
+
+/* Hjälpklass för horizontell layout */
+.row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+
+/* ===========================
+   Inputs & knappar
+   =========================== */
+.input, input, select, textarea{
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+}
+input.servings{ text-align:center; font-variant-numeric:tabular-nums }
+
+/* Buttons */
+.btn{
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:999px;
+  cursor:pointer;
+  transition: box-shadow .2s, transform .06s;
+}
+.btn:hover{ box-shadow:var(--shadow) }
+.btn:active{ transform:translateY(1px) scale(.995) }
+.btn.primary{
+  background:var(--accent); color:#fff;
+  border-color:color-mix(in oklab, var(--accent) 65%, var(--border));
+}
+
+/* ===========================
+   Cards & grid
+   =========================== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden; /* 👈 fixen här */
+}
+.card-body{ padding:16px; display:grid; gap:8px }
+.card-title{ font-weight:700 }
+
+/* Menyns rutnät */
+.menu-grid{
+  display:grid; gap:18px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* Kortsbild – jämn höjd via aspect ratio */
+.card-img{
+  display:block;
+  width:100%;
+  aspect-ratio: 4 / 3;            /* byt till 1/1 om du vill ha kvadrat */
+  object-fit:cover;
+  border-bottom:1px solid var(--border);
+  filter:saturate(110%);
+}
+
+/* Ingredienslistor (sekundär text) */
+.ing-list{ color:var(--text-sec); font-size:14px }
+
+/* ===========================
+   Inköpslista (grupper)
+   =========================== */
+.list-group{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:10px 12px;
+  margin-bottom:14px;
+}
+.list-title{ font-weight:800; font-size:13px; color:var(--text-sec); margin-bottom:6px }
+
+.item{
+  display:grid; grid-template-columns:auto 1fr auto;
+  gap:10px; align-items:center; padding:8px 0;
+  border-bottom:1px dashed var(--border);
+}
+.item:last-child{ border-bottom:none }
+.item-name{ font-weight:600 }
+.item-qty{ font-variant-numeric:tabular-nums; color:var(--text-sec) }
+
+/* ===========================
+   Filterchips (kategori)
+   =========================== */
+.filters{ display:flex; gap:8px; flex-wrap:wrap }
+.chip{
+  padding:6px 10px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  box-shadow:0 1px 1px rgba(0,0,0,0.03);
+  cursor:pointer;
+}
+.chip.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
+
+/* ===========================
+   Makro–chips (per portion)
+   =========================== */
+.macros{
+  display:flex; gap:8px; flex-wrap:wrap;
+  margin:6px 0 4px; font-size:13px;
+}
+.chip.kcal    { background:var(--chip-kcal-bg);  border-color:var(--chip-kcal-bd);  color:var(--chip-kcal-tx) }
+.chip.protein { background:var(--chip-prot-bg);  border-color:var(--chip-prot-bd);  color:var(--chip-prot-tx) }
+.chip.carbs   { background:var(--chip-carb-bg);  border-color:var(--chip-carb-bd);  color:var(--chip-carb-tx) }
+.chip.fat     { background:var(--chip-fat-bg);   border-color:var(--chip-fat-bd);   color:var(--chip-fat-tx) }
+
+/* ===========================
+   Toast–notiser (uppe till höger)
+   =========================== */
+.toast{
+  position:fixed; top:20px; right:20px; z-index:100;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:12px;
+  padding:10px 16px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transform:translateY(-20px);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.toast.show{ opacity:1; transform:translateY(0) }
+
+/* ===========================
+   Modal (Apple-inspirerad)
+   =========================== */
+.modal{
+  position:fixed; inset:0; z-index:200; isolation:isolate;
+  display:grid; place-items:center; pointer-events:none;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+.modal-backdrop{
+  position:absolute; inset:0; z-index:0; opacity:0; pointer-events:none;
+  background:rgba(255,255,255,.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  transition:opacity .25s ease;
+}
+.modal-card{
+  position:relative; z-index:1; pointer-events:auto;
+  width:92%; max-width:380px;
+  background:rgba(255,255,255,.85);
+  border:1px solid rgba(0,0,0,.05);
+  border-radius:20px; box-shadow:0 8px 28px rgba(0,0,0,.15);
+  transform:translateY(12px) scale(.96); opacity:0;
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  transition: transform .25s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+}
+.modal-header{
+  padding:18px 20px 12px; font-size:17px; font-weight:600;
+  text-align:center; color:#000; border-bottom:1px solid rgba(0,0,0,.06);
+}
+.modal-body{
+  padding:12px 20px 20px; font-size:15px; text-align:center; color:rgba(0,0,0,.7);
+}
+.modal-footer{
+  display:flex; justify-content:space-around; gap:10px; padding:10px;
+  border-top:1px solid rgba(0,0,0,.06);
+}
+.modal-btn{
+  flex:1; padding:10px 14px; border-radius:12px; font-size:15px; border:none; cursor:pointer;
+  transition: background .2s ease;
+}
+.modal-btn:hover{ background:rgba(0,0,0,.05) }
+.modal-btn.danger{ background:#ff3b30; color:#fff }
+.modal-btn.danger:hover{ background:#e63228 }
+
+/* Öppnat läge */
+.modal.open{ pointer-events:auto }
+.modal.open .modal-backdrop{ opacity:1; pointer-events:auto }
+.modal.open .modal-card{ opacity:1; transform:translateY(0) scale(1) }
+
+.macros + .macros { margin-top: 4px; }
+
+.macros {
+  display: flex;
+  gap: 6px;            /* lite mindre mellan chips */
+  flex-wrap: nowrap;   /* 🚫 hindrar radbrytning */
+  margin: 6px 0 4px;
+  font-size: 12px;     /* mindre text så alla får plats */
+}
+
+.chip {
+  padding: 4px 8px;    /* mindre padding för att spara plats */
+}
+
+.menu-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: stretch; /* gör så alla kort blir lika höga i varje rad */
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* fyller höjden som grid ger */
+}
+
+.card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1; /* fyller kvarvarande höjd i kortet */
+}
+
+.card-body .btn {
+  margin-top: auto; /* trycker ner knappen längst ner */
+}
+
+/* Hover-effekt på hela kortet */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* Hover-effekt på knappen */
+.btn.primary {
+  transition: background 0.2s ease, transform 0.06s ease, box-shadow 0.2s ease;
+}
+.btn.primary:hover {
+  background: color-mix(in oklab, var(--accent) 85%, white);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.btn.primary:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none;
+}
+
+
+
+/* ===========================
+   Rörelsepreferenser
+   =========================== */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0s !important; transition-duration:0s !important }
+}
