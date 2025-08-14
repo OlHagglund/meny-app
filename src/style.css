@@ -87,6 +87,21 @@ input.servings{ text-align:center; font-variant-numeric:tabular-nums }
   border-color:color-mix(in oklab, var(--accent) 65%, var(--border));
 }
 
+.btn.success {
+  background: #22c55e; /* grön bakgrund */
+  color: #fff;         /* vit text */
+  border-color: #16a34a; /* mörkare grön kant */
+}
+
+.btn.success:hover {
+  background: #16a34a; /* mörkare vid hover */
+}
+
+.btn.success:active {
+  background: #15803d; /* ännu mörkare vid klick */
+}
+
+
 /* ===========================
    Cards & grid
    =========================== */
@@ -233,16 +248,26 @@ input.servings{ text-align:center; font-variant-numeric:tabular-nums }
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   transition:opacity .25s ease;
 }
-.modal-card{
-  position:relative; z-index:1; pointer-events:auto;
-  width:92%; max-width:380px;
-  background:rgba(255,255,255,.85);
-  border:1px solid rgba(0,0,0,.05);
-  border-radius:20px; box-shadow:0 8px 28px rgba(0,0,0,0.15);
-  transform:translateY(12px) scale(.96); opacity:0;
-  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+.modal-card {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  width: 96%;              /* fyller nästan hela skärmen på små enheter */
+  max-width: 480px;        /* bredare än tidigare (380px) */
+  max-height: 80vh;        /* maxhöjd = 80% av viewport */
+  background: rgba(255,255,255,.85);
+  border: 1px solid rgba(0,0,0,.05);
+  border-radius: 20px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.15);
+  transform: translateY(12px) scale(.96);
+  opacity: 0;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   transition: transform .25s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+  overflow-y: auto;        /* gör så att innehållet scrollas om det blir för långt */
+  padding-bottom: 8px;     /* lite luft längst ner */
 }
+
 .modal-header{
   padding:18px 20px 12px; font-size:17px; font-weight:600;
   text-align:center; color:#000; border-bottom:1px solid rgba(0,0,0,.06);
@@ -294,6 +319,12 @@ input.servings{ text-align:center; font-variant-numeric:tabular-nums }
   transform: translateY(1px) scale(0.98);
   box-shadow: none;
 }
+/* Länkar i kort: ser ut som vanlig text/bild */
+.card-link { text-decoration: none; color: inherit; display: block; }
+.title-link .card-title { /* säkerställ att titel fortfarande ser ut som titel */
+  text-decoration: none;
+}
+
 
 /* ===========================
    Rörelsepreferenser
