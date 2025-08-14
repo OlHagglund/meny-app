@@ -1,23 +1,14 @@
 const CACHE_NAME = "meny-cache-v1";
-const ASSETS = [
-  "/",
-  "/index.html",
-  "/list.html",
-  "/src/style.css"
-];
+const ASSETS = ["/", "/index.html", "/list.html", "/src/style.css"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
 });
-
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-    ))
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
   );
 });
-
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   e.respondWith(

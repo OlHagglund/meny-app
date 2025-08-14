@@ -95,11 +95,12 @@ function renderMacroBlocks(nutr) {
    =========================== */
 const app = document.querySelector('#app')
 app.innerHTML = `
-  <header>
+ <header>
     <div class="head">
       <div class="brand">Meny</div>
       <div class="row">
         <a class="btn" href="/list.html">Öppna inköpslista</a>
+        <a class="btn" href="/recipes.html">Hantera recept</a>
       </div>
     </div>
   </header>
